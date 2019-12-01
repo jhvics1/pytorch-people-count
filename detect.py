@@ -145,7 +145,7 @@ class SDCNet:
             image = image / 255. - self.rgb  # to normalization,auto to change dtype
         else:
             # print("shape - {}, Path {}".format(image.shape, path))
-            image = cv2.cvtColor(path, cv2.COLOR_GRAY2RGB)
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
             image = image / 255. - self.rgb
         image = image.transpose((2, 0, 1))
         image = torch.from_numpy(image)
@@ -211,8 +211,8 @@ if __name__ == "__main__":
         # print("img - {}".format(img))
         img = os.path.join(args.image_folder, img)
         # Yolo version
-        val = model['yolo'].get_count(img)
-        print('{}'.format(val))
+        # val = model['yolo'].get_count(img)
+        # print('{}'.format(val))
         # SDCNet Version
         val = model['sdcnet'].get_count(img)
         print('{}'.format(val))
