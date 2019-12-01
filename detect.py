@@ -3,8 +3,9 @@ from __future__ import division
 
 import argparse
 import shutil
-
+import cv2
 from utils.utils import *
+from utils.IOtools import *
 from utils.datasets import *
 from utils.load_data_V2 import *
 from network.object_detection.models import *
@@ -61,12 +62,12 @@ class Yolo:
         # Get detections
         with torch.no_grad():
             # print("shape - {}".format(input_imgs.shape))
-            if input_imgs.shape[1] > 1:
-                detections = self.model(input_imgs)
-                detections = non_max_suppression(detections, self.opts.conf_thres, self.opts.nms_thres)
-            else:
-                print("shape - {}, Path {}".format(input_imgs.shape, path))
-
+            # if input_imgs.shape[1] > 1:
+            detections = self.model(input_imgs)
+            detections = non_max_suppression(detections, self.opts.conf_thres, self.opts.nms_thres)
+            # else:
+            #     print("shape - {}, Path {}".format(input_imgs.shape, path))
+            #     detections = list()
             for i, item in enumerate(detections):
                 if item is not None:
                     # print("detections 2 - {}".format(detections))
@@ -80,11 +81,11 @@ class Yolo:
                     result['filename'] = filename
                     log_str = '{\'filename\':\'%s\', \'count\':%.3f}' % (result['filename'], result['count'])
                     print("\t--> Log (Yolo) - \t{}".format(log_str))
-                    if self.opts.log_enable:
-                        txt_write(self.opts.output + "/output.log", log_str, mode='a')
-                    if self.opts.db_enable:
-                        db_insert(self.opts, result)
-        return ('%.3f'%result['count'])
+        if self.opts.log_enable:
+            txt_write(self.opts.output + "/output.log", log_str, mode='a')
+        if self.opts.db_enable:
+            db_insert(self.opts, result)
+        return '%.3f' % result['count']
 
 
 class SDCNet:
@@ -171,7 +172,7 @@ class SDCNet:
             txt_write(self.args.output + "/output.log", log_str, mode='a')
         if self.args.db_enable:
             db_insert(self.args, result)
-        return ('%.3f'%result['count'])
+        return '%.3f' % result['count']
 
 
 if __name__ == "__main__":
@@ -196,7 +197,7 @@ if __name__ == "__main__":
     shutil.rmtree(args.output)
     os.makedirs(args.output, exist_ok=True)
     if args.log_enable:
-        txt_write(self.args.output + "/output.log", log_str, mode='w')
+        txt_write(args.output + "/output.log", "", mode='w')
 
     if args.db_enable:
         args.mydb = mysql.connector.connect(
@@ -211,11 +212,11 @@ if __name__ == "__main__":
         # print("img - {}".format(img))
         img = os.path.join(args.image_folder, img)
         # Yolo version
-        # val = model['yolo'].get_count(img)
+        val = model['yolo'].get_count(img)
         # print('{}'.format(val))
         # SDCNet Version
         val = model['sdcnet'].get_count(img)
-        print('{}'.format(val))
+        # print('{}'.format(val))
 
     if args.db_enable:
         args.mydb.commit()

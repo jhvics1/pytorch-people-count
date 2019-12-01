@@ -6,10 +6,11 @@ import numpy as np
 from PIL import Image
 import torch
 import torch.nn.functional as F
-
+import cv2
 from utils.augmentations import horisontal_flip
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
+from skimage import io
 
 
 def pad_to_square(img, pad_value):
@@ -37,7 +38,11 @@ def random_resize(images, min_size=288, max_size=448):
 
 
 def transform_img_yolo(img_path, img_size):
-    img = transforms.ToTensor()(Image.open(img_path))
+    # img = Image.open(img_path)
+    img = io.imread(img_path)
+    if len(img.shape) <= 2:
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+    img = transforms.ToTensor()(img)
     # Pad to square resolution
     img, _ = pad_to_square(img, 0)
     # Resize
